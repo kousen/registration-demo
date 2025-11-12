@@ -48,3 +48,5 @@ next-env.d.ts
 /data
 *.db
 *.db-journal
+# Ignore JSON files in data directory only
+/data/*.json

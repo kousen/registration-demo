@@ -3,6 +3,17 @@
   "version": "0.1.0",
   "private": true,
   "license": "MIT",
+  "description": "A user registration demo application built with Next.js, React, TypeScript, and SQLite",
+  "keywords": [
+    "nextjs",
+    "react",
+    "typescript",
+    "registration",
+    "sqlite",
+    "playwright",
+    "demo"
+  ],
+  "author": "Ken Kousen",
   "scripts": {
     "dev": "next dev",
     "build": "next build",

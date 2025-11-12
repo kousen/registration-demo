@@ -1,4 +1,8 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# User Registration Demo
+
+A production-ready user registration application built with Next.js, React, TypeScript, and SQLite. Features comprehensive validation, password hashing, and a full test suite.
+
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
 ## User Registration Demo
 
@@ -174,6 +178,10 @@ registration-demo/
 ├── .env.example                 # Environment variables template
 └── LICENSE                      # MIT License
 ```
+
+## Contributing
+
+Contributions are welcome! Please see [CONTRIBUTING.md](CONTRIBUTING.md) for guidelines.
 
 ## License
 
