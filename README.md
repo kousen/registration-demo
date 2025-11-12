@@ -55,12 +55,13 @@ npm run test:debug
 
 ### Test Coverage
 
-The test suite includes:
+The test suite includes **20 test cases** (60 tests total across Chromium, Firefox, and WebKit):
 
+**Core Functionality:**
 - ✅ Form display and layout verification
 - ✅ Empty form validation
 - ✅ Email format validation
-- ✅ Password length validation
+- ✅ Password length validation (minimum and maximum)
 - ✅ Password confirmation matching
 - ✅ Successful user registration
 - ✅ Duplicate email prevention
@@ -68,6 +69,16 @@ The test suite includes:
 - ✅ User list updates after registration
 - ✅ Responsive design testing
 - ✅ Error message display and clearing
+
+**Input Sanitization & Validation:**
+- ✅ Whitespace trimming from name and email
+- ✅ Email normalization (lowercase conversion)
+- ✅ Case-insensitive email duplicate detection
+- ✅ Name length limit validation (100 characters)
+- ✅ Email length limit validation (255 characters)
+- ✅ Password maximum length validation (128 characters)
+- ✅ Whitespace-only input handling
+- ✅ Password space preservation (spaces in passwords are preserved)
 
 ### Installing Playwright Browsers
 
@@ -103,11 +114,13 @@ This application uses **SQLite** for data storage. The database file (`users.db`
 - **Input Validation**: Comprehensive client-side and server-side validation for all user inputs
 - **Input Sanitization**: All inputs are trimmed and length-limited to prevent DoS attacks
 - **Email Normalization**: Emails are automatically normalized (lowercase, trimmed) before storage
+- **Case-Insensitive Email Uniqueness**: Prevents duplicate accounts with different email casing
 - **No Plain Text Passwords**: Passwords are never stored in plain text
 - **Input Length Limits**: 
   - Name: Maximum 100 characters
   - Email: Maximum 255 characters
   - Password: 6-128 characters
+- **Whitespace Handling**: All text inputs are automatically trimmed, except passwords (which preserve spaces)
 
 ## Configuration
 
@@ -138,7 +151,33 @@ NODE_ENV=development
 - **Database**: SQLite (better-sqlite3)
 - **Password Security**: bcrypt
 - **Validation**: Custom validation utilities with input sanitization
-- **Testing**: Playwright
+- **Testing**: Playwright (60 tests across 3 browsers)
+
+## Project Structure
+
+```
+registration-demo/
+├── app/
+│   ├── api/
+│   │   ├── register/route.ts    # Registration API endpoint
+│   │   └── users/route.ts       # Users list API endpoint
+│   └── page.tsx                 # Main page component
+├── components/
+│   ├── RegisterForm.tsx         # Registration form component
+│   └── UserList.tsx             # User list display component
+├── lib/
+│   ├── db.ts                    # Database utilities and repository
+│   └── validation.ts            # Validation and sanitization utilities
+├── tests/
+│   └── registration.spec.ts     # Playwright test suite
+├── data/                        # Database storage (gitignored)
+├── .env.example                 # Environment variables template
+└── LICENSE                      # MIT License
+```
+
+## License
+
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
 
 ## Learn More
 
