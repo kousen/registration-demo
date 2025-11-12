@@ -7,7 +7,8 @@ A simple user registration application built with Next.js, React, TypeScript, an
 - User registration form with validation
 - Real-time form validation (email format, password matching, required fields)
 - User list display
-- JSON file-based storage
+- **SQLite database** for persistent storage
+- **Password hashing** with bcrypt for security
 - Responsive design
 
 ## Getting Started
@@ -81,6 +82,35 @@ Or install only Chromium:
 ```bash
 npx playwright install chromium
 ```
+
+## Database
+
+This application uses **SQLite** for data storage. The database file (`users.db`) is automatically created in the `/data` directory when the application first runs.
+
+### Database Schema
+
+- **users** table:
+  - `id` (TEXT, PRIMARY KEY)
+  - `name` (TEXT, NOT NULL)
+  - `email` (TEXT, UNIQUE, NOT NULL)
+  - `password_hash` (TEXT, NOT NULL) - Passwords are hashed using bcrypt
+  - `registered_at` (TEXT, NOT NULL) - ISO 8601 timestamp
+
+### Security Features
+
+- **Password Hashing**: All passwords are hashed using bcrypt with 10 salt rounds before storage
+- **Email Uniqueness**: Database enforces unique email addresses
+- **Input Validation**: Server-side validation for all user inputs
+- **No Plain Text Passwords**: Passwords are never stored in plain text
+
+## Technology Stack
+
+- **Framework**: Next.js 16 with App Router
+- **Language**: TypeScript
+- **Styling**: Tailwind CSS 4
+- **Database**: SQLite (better-sqlite3)
+- **Password Security**: bcrypt
+- **Testing**: Playwright
 
 ## Learn More
 

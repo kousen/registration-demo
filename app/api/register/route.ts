@@ -1,43 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import fs from 'fs';
-import path from 'path';
-
-interface User {
-  id: string;
-  name: string;
-  email: string;
-  password: string; // In production, hash this!
-  registeredAt: string;
-}
-
-const DATA_FILE = path.join(process.cwd(), 'data', 'users.json');
-
-// Ensure data directory exists
-function ensureDataDirectory() {
-  const dataDir = path.dirname(DATA_FILE);
-  if (!fs.existsSync(dataDir)) {
-    fs.mkdirSync(dataDir, { recursive: true });
-  }
-}
-
-function readUsers(): User[] {
-  ensureDataDirectory();
-  if (!fs.existsSync(DATA_FILE)) {
-    return [];
-  }
-  try {
-    const data = fs.readFileSync(DATA_FILE, 'utf-8');
-    return JSON.parse(data);
-  } catch (error) {
-    console.error('Error reading users:', error);
-    return [];
-  }
-}
-
-function writeUsers(users: User[]) {
-  ensureDataDirectory();
-  fs.writeFileSync(DATA_FILE, JSON.stringify(users, null, 2));
-}
+import { createUser, getUserByEmail } from '@/lib/db';
 
 export async function POST(request: NextRequest) {
   try {
@@ -67,36 +29,35 @@ export async function POST(request: NextRequest) {
     }
 
     // Check if user already exists
-    const users = readUsers();
-    if (users.some(user => user.email === email)) {
+    const existingUser = getUserByEmail(email);
+    if (existingUser) {
       return NextResponse.json(
         { error: 'User with this email already exists' },
         { status: 409 }
       );
     }
 
-    // Create new user
-    const newUser: User = {
-      id: Date.now().toString(),
-      name,
-      email,
-      password, // ⚠️ In production, hash this with bcrypt!
-      registeredAt: new Date().toISOString(),
-    };
-
-    users.push(newUser);
-    writeUsers(users);
+    // Create new user (password will be hashed in createUser)
+    const newUser = await createUser(name, email, password);
 
     return NextResponse.json(
-      { message: 'User registered successfully', user: { id: newUser.id, name: newUser.name, email: newUser.email } },
+      { message: 'User registered successfully', user: newUser },
       { status: 201 }
     );
-  } catch (error) {
+  } catch (error: any) {
     console.error('Registration error:', error);
+    
+    // Handle duplicate email error from database
+    if (error.message === 'User with this email already exists') {
+      return NextResponse.json(
+        { error: error.message },
+        { status: 409 }
+      );
+    }
+    
     return NextResponse.json(
       { error: 'Internal server error' },
       { status: 500 }
     );
   }
 }
-

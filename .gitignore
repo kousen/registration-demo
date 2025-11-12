@@ -45,3 +45,5 @@ next-env.d.ts
 
 # data storage
 /data
+*.db
+*.db-journal
