@@ -1,8 +1,24 @@
 This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
 
+## User Registration Demo
+
+A simple user registration application built with Next.js, React, TypeScript, and Tailwind CSS. Features include:
+
+- User registration form with validation
+- Real-time form validation (email format, password matching, required fields)
+- User list display
+- JSON file-based storage
+- Responsive design
+
 ## Getting Started
 
-First, run the development server:
+First, install dependencies:
+
+```bash
+npm install
+```
+
+Then, run the development server:
 
 ```bash
 npm run dev
@@ -18,7 +34,53 @@ Open [http://localhost:3000](http://localhost:3000) with your browser to see the
 
 You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+## Running Tests
+
+This project includes comprehensive Playwright UI tests. To run the tests:
+
+```bash
+# Run all tests
+npm test
+
+# Run tests with UI mode (interactive)
+npm run test:ui
+
+# Run tests in headed mode (see browser)
+npm run test:headed
+
+# Run tests in debug mode
+npm run test:debug
+```
+
+### Test Coverage
+
+The test suite includes:
+
+- ✅ Form display and layout verification
+- ✅ Empty form validation
+- ✅ Email format validation
+- ✅ Password length validation
+- ✅ Password confirmation matching
+- ✅ Successful user registration
+- ✅ Duplicate email prevention
+- ✅ Form field clearing after submission
+- ✅ User list updates after registration
+- ✅ Responsive design testing
+- ✅ Error message display and clearing
+
+### Installing Playwright Browsers
+
+If you need to install Playwright browsers for the first time:
+
+```bash
+npx playwright install
+```
+
+Or install only Chromium:
+
+```bash
+npx playwright install chromium
+```
 
 ## Learn More
 
