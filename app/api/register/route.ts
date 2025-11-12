@@ -1,29 +1,44 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createUser, getUserByEmail } from '@/lib/db';
+import {
+  validateName,
+  validateEmail,
+  validatePassword,
+  normalizeEmail,
+  sanitizeName,
+} from '@/lib/validation';
 
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
-    const { name, email, password } = body;
+    let { name, email, password } = body;
 
-    // Validation
-    if (!name || !email || !password) {
+    // Sanitize inputs
+    name = sanitizeName(name || '');
+    email = normalizeEmail(email || '');
+    password = password || '';
+
+    // Validate inputs
+    const nameValidation = validateName(name);
+    if (!nameValidation.isValid) {
       return NextResponse.json(
-        { error: 'Name, email, and password are required' },
+        { error: nameValidation.error },
         { status: 400 }
       );
     }
 
-    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+    const emailValidation = validateEmail(email);
+    if (!emailValidation.isValid) {
       return NextResponse.json(
-        { error: 'Invalid email format' },
+        { error: emailValidation.error },
         { status: 400 }
       );
     }
 
-    if (password.length < 6) {
+    const passwordValidation = validatePassword(password);
+    if (!passwordValidation.isValid) {
       return NextResponse.json(
-        { error: 'Password must be at least 6 characters' },
+        { error: passwordValidation.error },
         { status: 400 }
       );
     }

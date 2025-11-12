@@ -98,10 +98,37 @@ This application uses **SQLite** for data storage. The database file (`users.db`
 
 ### Security Features
 
-- **Password Hashing**: All passwords are hashed using bcrypt with 10 salt rounds before storage
+- **Password Hashing**: All passwords are hashed using bcrypt (configurable salt rounds, default: 10) before storage
 - **Email Uniqueness**: Database enforces unique email addresses
-- **Input Validation**: Server-side validation for all user inputs
+- **Input Validation**: Comprehensive client-side and server-side validation for all user inputs
+- **Input Sanitization**: All inputs are trimmed and length-limited to prevent DoS attacks
+- **Email Normalization**: Emails are automatically normalized (lowercase, trimmed) before storage
 - **No Plain Text Passwords**: Passwords are never stored in plain text
+- **Input Length Limits**: 
+  - Name: Maximum 100 characters
+  - Email: Maximum 255 characters
+  - Password: 6-128 characters
+
+## Configuration
+
+The application can be configured using environment variables. Create a `.env` file in the root directory (see `.env.example` for reference):
+
+```bash
+# Database Configuration
+DATABASE_PATH=data/users.db
+
+# Security Configuration
+BCRYPT_SALT_ROUNDS=10
+
+# Application Configuration
+NODE_ENV=development
+```
+
+### Environment Variables
+
+- `DATABASE_PATH`: Path to the SQLite database file (default: `data/users.db`)
+- `BCRYPT_SALT_ROUNDS`: Number of salt rounds for password hashing (default: `10`)
+- `NODE_ENV`: Environment mode (default: `development`)
 
 ## Technology Stack
 
@@ -110,6 +137,7 @@ This application uses **SQLite** for data storage. The database file (`users.db`
 - **Styling**: Tailwind CSS 4
 - **Database**: SQLite (better-sqlite3)
 - **Password Security**: bcrypt
+- **Validation**: Custom validation utilities with input sanitization
 - **Testing**: Playwright
 
 ## Learn More

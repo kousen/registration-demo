@@ -195,5 +195,167 @@ test.describe('User Registration App', () => {
     await expect(page.locator('#password')).toBeVisible();
     await expect(page.getByRole('button', { name: 'Register' })).toBeVisible();
   });
+
+  test('should trim whitespace from name input', async ({ page }) => {
+    const timestamp = Date.now();
+    const testEmail = `trim${timestamp}@example.com`;
+    const testName = `  Trimmed Name ${timestamp}  `;
+    const expectedName = `Trimmed Name ${timestamp}`; // Should be trimmed
+    
+    // Fill form with name containing whitespace
+    await page.getByRole('textbox', { name: 'Name' }).fill(testName);
+    await page.getByRole('textbox', { name: 'Email' }).fill(testEmail);
+    await page.locator('#password').fill('password123');
+    await page.locator('#confirmPassword').fill('password123');
+    
+    await page.getByRole('button', { name: 'Register' }).click();
+    
+    // Wait for success
+    await expect(page.getByText('Registration successful!')).toBeVisible();
+    
+    // Verify trimmed name appears in user list
+    await expect(page.getByRole('heading', { name: expectedName })).toBeVisible();
+  });
+
+  test('should normalize email to lowercase', async ({ page }) => {
+    const timestamp = Date.now();
+    const testEmail = `UPPERCASE${timestamp}@EXAMPLE.COM`;
+    const normalizedEmail = `uppercase${timestamp}@example.com`;
+    const testName = `Test User ${timestamp}`;
+    
+    // Fill form with uppercase email
+    await page.getByRole('textbox', { name: 'Name' }).fill(testName);
+    await page.getByRole('textbox', { name: 'Email' }).fill(testEmail);
+    await page.locator('#password').fill('password123');
+    await page.locator('#confirmPassword').fill('password123');
+    
+    await page.getByRole('button', { name: 'Register' }).click();
+    
+    // Wait for success
+    await expect(page.getByText('Registration successful!')).toBeVisible();
+    
+    // Verify normalized email appears in user list
+    await expect(page.getByText(normalizedEmail)).toBeVisible();
+  });
+
+  test('should prevent duplicate emails with different casing', async ({ page }) => {
+    const timestamp = Date.now();
+    const testEmail = `case${timestamp}@example.com`;
+    const testEmailUpper = `CASE${timestamp}@EXAMPLE.COM`;
+    const testName = `Test User ${timestamp}`;
+    
+    // Register with lowercase email
+    await page.getByRole('textbox', { name: 'Name' }).fill(testName);
+    await page.getByRole('textbox', { name: 'Email' }).fill(testEmail);
+    await page.locator('#password').fill('password123');
+    await page.locator('#confirmPassword').fill('password123');
+    await page.getByRole('button', { name: 'Register' }).click();
+    
+    await expect(page.getByText('Registration successful!')).toBeVisible();
+    
+    // Try to register with same email but different casing
+    await page.getByRole('textbox', { name: 'Name' }).fill('Another User');
+    await page.getByRole('textbox', { name: 'Email' }).fill(testEmailUpper);
+    await page.locator('#password').fill('password456');
+    await page.locator('#confirmPassword').fill('password456');
+    await page.getByRole('button', { name: 'Register' }).click();
+    
+    // Should reject as duplicate
+    await expect(page.getByText('User with this email already exists')).toBeVisible();
+  });
+
+  test('should validate name length limit', async ({ page }) => {
+    // Create a name longer than 100 characters
+    const longName = 'A'.repeat(101);
+    
+    await page.getByRole('textbox', { name: 'Name' }).fill(longName);
+    await page.getByRole('textbox', { name: 'Email' }).fill('test@example.com');
+    await page.locator('#password').fill('password123');
+    await page.locator('#confirmPassword').fill('password123');
+    
+    await page.getByRole('button', { name: 'Register' }).click();
+    
+    // Check for length validation error
+    await expect(page.getByText('Name must be less than 100 characters')).toBeVisible();
+  });
+
+  test('should validate email length limit', async ({ page }) => {
+    // Create an email longer than 255 characters
+    const longLocalPart = 'a'.repeat(250);
+    const longEmail = `${longLocalPart}@example.com`;
+    
+    await page.getByRole('textbox', { name: 'Name' }).fill('Test User');
+    await page.getByRole('textbox', { name: 'Email' }).fill(longEmail);
+    await page.locator('#password').fill('password123');
+    await page.locator('#confirmPassword').fill('password123');
+    
+    await page.getByRole('button', { name: 'Register' }).click();
+    
+    // Check for length validation error
+    await expect(page.getByText('Email must be less than 255 characters')).toBeVisible();
+  });
+
+  test('should validate password maximum length', async ({ page }) => {
+    // Create a password longer than 128 characters
+    const longPassword = 'a'.repeat(129);
+    
+    await page.getByRole('textbox', { name: 'Name' }).fill('Test User');
+    await page.getByRole('textbox', { name: 'Email' }).fill('test@example.com');
+    await page.locator('#password').fill(longPassword);
+    await page.locator('#confirmPassword').fill(longPassword);
+    
+    await page.getByRole('button', { name: 'Register' }).click();
+    
+    // Check for length validation error
+    await expect(page.getByText('Password must be less than 128 characters')).toBeVisible();
+  });
+
+  test('should handle whitespace-only name', async ({ page }) => {
+    // Fill form with only whitespace in name
+    await page.getByRole('textbox', { name: 'Name' }).fill('   ');
+    await page.getByRole('textbox', { name: 'Email' }).fill('test@example.com');
+    await page.locator('#password').fill('password123');
+    await page.locator('#confirmPassword').fill('password123');
+    
+    await page.getByRole('button', { name: 'Register' }).click();
+    
+    // Should show name required error (whitespace is trimmed)
+    await expect(page.getByText('Name is required')).toBeVisible();
+  });
+
+  test('should handle whitespace-only email', async ({ page }) => {
+    // Fill form with only whitespace in email
+    await page.getByRole('textbox', { name: 'Name' }).fill('Test User');
+    await page.getByRole('textbox', { name: 'Email' }).fill('   ');
+    await page.locator('#password').fill('password123');
+    await page.locator('#confirmPassword').fill('password123');
+    
+    await page.getByRole('button', { name: 'Register' }).click();
+    
+    // Should show email required error (whitespace is trimmed)
+    await expect(page.getByText('Email is required')).toBeVisible();
+  });
+
+  test('should trim email whitespace but preserve password spaces', async ({ page }) => {
+    const timestamp = Date.now();
+    const testEmail = `  spaced${timestamp}@example.com  `;
+    const normalizedEmail = `spaced${timestamp}@example.com`;
+    const testName = `Test User ${timestamp}`;
+    const passwordWithSpaces = 'pass word123'; // Password with spaces should be preserved
+    
+    // Fill form with email containing whitespace
+    await page.getByRole('textbox', { name: 'Name' }).fill(testName);
+    await page.getByRole('textbox', { name: 'Email' }).fill(testEmail);
+    await page.locator('#password').fill(passwordWithSpaces);
+    await page.locator('#confirmPassword').fill(passwordWithSpaces);
+    
+    await page.getByRole('button', { name: 'Register' }).click();
+    
+    // Should succeed (email trimmed, password preserved)
+    await expect(page.getByText('Registration successful!')).toBeVisible();
+    
+    // Verify normalized email appears
+    await expect(page.getByText(normalizedEmail)).toBeVisible();
+  });
 });
 

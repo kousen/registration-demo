@@ -1,6 +1,12 @@
 'use client';
 
 import { useState, useEffect, useRef } from 'react';
+import {
+  validateName,
+  validateEmail,
+  validatePassword,
+  validatePasswordConfirmation,
+} from '@/lib/validation';
 
 interface RegisterFormProps {
   onSuccess: () => void;
@@ -46,24 +52,31 @@ export default function RegisterForm({ onSuccess }: RegisterFormProps) {
   const validateForm = (): boolean => {
     const newErrors: FormErrors = {};
 
-    if (!formData.name.trim()) {
-      newErrors.name = 'Name is required';
+    // Validate name
+    const nameValidation = validateName(formData.name);
+    if (!nameValidation.isValid) {
+      newErrors.name = nameValidation.error;
     }
 
-    if (!formData.email.trim()) {
-      newErrors.email = 'Email is required';
-    } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email)) {
-      newErrors.email = 'Please enter a valid email address';
+    // Validate email
+    const emailValidation = validateEmail(formData.email);
+    if (!emailValidation.isValid) {
+      newErrors.email = emailValidation.error;
     }
 
-    if (!formData.password) {
-      newErrors.password = 'Password is required';
-    } else if (formData.password.length < 6) {
-      newErrors.password = 'Password must be at least 6 characters';
+    // Validate password
+    const passwordValidation = validatePassword(formData.password);
+    if (!passwordValidation.isValid) {
+      newErrors.password = passwordValidation.error;
     }
 
-    if (formData.password !== formData.confirmPassword) {
-      newErrors.confirmPassword = 'Passwords do not match';
+    // Validate password confirmation
+    const confirmPasswordValidation = validatePasswordConfirmation(
+      formData.password,
+      formData.confirmPassword
+    );
+    if (!confirmPasswordValidation.isValid) {
+      newErrors.confirmPassword = confirmPasswordValidation.error;
     }
 
     setErrors(newErrors);
@@ -137,7 +150,12 @@ export default function RegisterForm({ onSuccess }: RegisterFormProps) {
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
-    setFormData(prev => ({ ...prev, [name]: value }));
+    // Trim inputs (except password fields)
+    const sanitizedValue = name === 'password' || name === 'confirmPassword' 
+      ? value 
+      : value.trim();
+    
+    setFormData(prev => ({ ...prev, [name]: sanitizedValue }));
     // Clear error when user starts typing
     if (errors[name as keyof FormErrors]) {
       setErrors(prev => ({ ...prev, [name]: undefined }));

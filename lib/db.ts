@@ -3,16 +3,22 @@ import path from 'path';
 import fs from 'fs';
 import bcrypt from 'bcrypt';
 
-const dbDir = path.join(process.cwd(), 'data');
-const dbPath = path.join(dbDir, 'users.db');
+// Configuration from environment variables with defaults
+const DB_DIR = process.env.DATABASE_PATH 
+  ? path.dirname(process.env.DATABASE_PATH)
+  : path.join(process.cwd(), 'data');
+const DB_PATH = process.env.DATABASE_PATH 
+  ? process.env.DATABASE_PATH
+  : path.join(DB_DIR, 'users.db');
+const BCRYPT_SALT_ROUNDS = parseInt(process.env.BCRYPT_SALT_ROUNDS || '10', 10);
 
 // Ensure data directory exists
-if (!fs.existsSync(dbDir)) {
-  fs.mkdirSync(dbDir, { recursive: true });
+if (!fs.existsSync(DB_DIR)) {
+  fs.mkdirSync(DB_DIR, { recursive: true });
 }
 
 // Initialize database
-const db = new Database(dbPath);
+const db = new Database(DB_PATH);
 
 // Create users table if it doesn't exist
 db.exec(`
@@ -49,8 +55,7 @@ export interface SafeUser {
  * Hash a password using bcrypt
  */
 export async function hashPassword(password: string): Promise<string> {
-  const saltRounds = 10;
-  return bcrypt.hash(password, saltRounds);
+  return bcrypt.hash(password, BCRYPT_SALT_ROUNDS);
 }
 
 /**
